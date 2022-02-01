@@ -24,7 +24,7 @@ function Home() {
                     <img src="images/support.png" alt="" />
                 </b>
             </div>
-        </div >
+        </div>
     );
 }
 

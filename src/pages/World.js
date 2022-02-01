@@ -1,13 +1,17 @@
 import React from 'react';
 import { Button, Card, Container, Row, Col, Stack } from 'react-bootstrap';
 
+function test() {
+    console.log("Hlllll");
+}
+
 function World() {
     console.log("World");
     return (
         <Container>
             <Row xs={1} md={2} className="g-4">
                 {Array.from({ length: 4 }).map((_, idx) => (
-                    <Col>
+                    <Col key={idx}>
                         <Card>
                             <Card.Img variant="top" src="images/support.png" />
                             <Card.Body>
@@ -22,8 +26,8 @@ function World() {
                                     현재가: 1 ETH ({'\u2252'} ₩42,500)
                                 </Card.Text>
                                 <Stack direction="horizontal" gap={3}>
-                                    <Button onClick={''} variant="primary">구매</Button>
-                                    <Button onClick={''} variant="primary">조회</Button>
+                                    <Button onClick={test} variant="primary">구매</Button>
+                                    <Button onClick={test} variant="primary">조회</Button>
                                 </Stack>
                             </Card.Body>
                         </Card>
