@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.24 <=0.9.0;
+pragma solidity ^0.8.0;
 
-/* is ERC165 */
+import "./Lego.sol";
+import "./Owners.sol";
+
 interface ERC721 {
     event Transfer(
         address indexed _from,
@@ -23,39 +25,72 @@ interface ERC721 {
 
     function ownerOf(uint256 _tokenId) external view returns (address);
 
-    // function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes data) public ;
-    // function safeTransferFrom(address _from, address _to, uint256 _tokenId) public ;
     function transferFrom(
         address _from,
         address _to,
         uint256 _tokenId
     ) external;
-    // function approve(address _approved, uint256 _tokenId) public ;
-    // function setApprovalForAll(address _operator, bool _approved) public;
-    // function getApproved(uint256 _tokenId) public view returns (address);
-    // function isApprovedForAll(address _owner, address _operator) public view returns (bool);
 }
 
 contract LegoNFT is ERC721 {
     mapping(uint256 => address) LegoOwner;
     mapping(address => uint256) ownedLegoCounts;
     mapping(address => bool) ownedLegoPrint;
+    mapping(address => Lego[]) ownerToLego;
+    mapping(address => Owners) owners;
 
-    function mint(address _to, uint256 _legoId) public {
-        LegoOwner[_legoId] = _to;
-        ownedLegoCounts[_to] += 1;
-        ownedLegoPrint[_to] = true;
+    address owner;
+
+    Lego[] public Legos;
+
+    constructor() public payable {
+        owner = msg.sender;
     }
 
-    function balanceOf(address _owner) public view override returns (uint256) {
+    modifier restricted() {
+        if (msg.sender == owner) _;
+    }
+
+    function mint(
+        string memory _legoName,
+        string memory _img,
+        string memory _description
+    ) public returns (uint256) {
+        Lego memory newLego = Lego(_legoName, _img, _description, msg.sender);
+        Legos.push(newLego);
+        uint256 legoId = Legos.length - 1;
+        LegoOwner[legoId] = msg.sender;
+        ownedLegoCounts[msg.sender] += 1;
+        ownedLegoPrint[msg.sender] = true;
+        return legoId;
+    }
+
+    function balanceOf(address _owner)
+        public
+        view
+        override
+        restricted
+        returns (uint256)
+    {
         return ownedLegoCounts[_owner];
     }
 
-    function ownerOf(uint256 _legoId) public view override returns (address) {
+    function ownerOf(uint256 _legoId)
+        public
+        view
+        override
+        restricted
+        returns (address)
+    {
         return LegoOwner[_legoId];
     }
 
-    function ownerOfLegoPrint(address _owner) public view returns (bool) {
+    function ownerOfLegoPrint(address _owner)
+        public
+        view
+        restricted
+        returns (bool)
+    {
         return ownedLegoPrint[_owner];
     }
 
@@ -63,9 +98,8 @@ contract LegoNFT is ERC721 {
         address _from,
         address _to,
         uint256 _legoId
-    ) public override {
+    ) public override restricted {
         address owner = ownerOf(_legoId);
-        require(msg.sender == owner);
         require(_from != address(0));
         require(_to != address(0));
 
