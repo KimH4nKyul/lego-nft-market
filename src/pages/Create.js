@@ -1,23 +1,79 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button } from 'react-bootstrap';
-import { ethers } from 'ethers';
+import ipfs from "../ipfs";
+import {useMetaMask} from "metamask-react";
 
 function Create() {
-    console.log("Create");
-    const [imageSrc, setImageSrc] = useState('');
-    const encodeFileToBase64 = (fileBlob) => {
+    const { account } = useMetaMask();
+    const [previewImageSrc, setPreviewImageSrc] = useState('');
+    const [uploadImageSrc, setUploadImageSrc] = useState('');
+
+    const bufferedImage = (fileBlob) => {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(fileBlob);
+        return new Promise((resolve) => {
+            reader.onloadend = () => {
+                setUploadImageSrc(reader.result);
+                resolve();
+            }
+        });
+    }
+
+    const previewImage = (fileBlob) => {
         const reader = new FileReader();
         reader.readAsDataURL(fileBlob);
         return new Promise((resolve) => {
             reader.onload = () => {
-                setImageSrc(reader.result);
+                setPreviewImageSrc(reader.result);
                 resolve();
             }
         });
     };
 
     function handleImageUpload(event) {
-        encodeFileToBase64(event.target.files[0]);
+        const fileBlob = event.target.files[0];
+        // if(fileBlob.size > (100 * 1024 * 1024)) {alert("Don't do that!")}
+        previewImage(fileBlob)
+            .then(()=> {
+                bufferedImage(fileBlob)
+                    .catch((error)=>{
+                        console.error("image to buffer: ", error);
+                    });
+            })
+            .catch((error)=>{
+                console.error("preview image: ", error);
+        });
+    }
+
+    function submitHandler(event) {
+        event.preventDefault();
+        const title = document.getElementById('title').value;
+        const desc = document.getElementById('description').value;
+
+        const minting = async() => {
+            const imageSrcToHash = await ipfs.add(uploadImageSrc)
+                .catch((error)=>{
+                    console.log("(IPFS) add image: ", error);
+                });
+
+            const metadata = {
+                title: title,
+                description: desc,
+                creator: account,
+                image: "https://ipfs.io/ipfs/" + imageSrcToHash.path,
+            }
+
+            let metadataToHash = await ipfs.add(JSON.stringify(metadata))
+                .catch((error)=>{
+                    console.log("(IPFS) add metadata: ", error);
+                });
+
+            metadataToHash = "https://ipfs.io/ipfs/" + metadataToHash.path;
+
+            console.log(metadataToHash);
+        }
+        minting();
+        // document.location.replace('/world');
     }
 
     return (
@@ -26,11 +82,11 @@ function Create() {
                 <Card.Header className='centered'>NFT 생성</Card.Header>
                 <Card.Body className="centered">
                     <div className="preview" id="preview">
-                        {imageSrc && <img src={imageSrc} alt="" />}
+                        {previewImageSrc && <img src={previewImageSrc} alt="" />}
                     </div>
                 </Card.Body>
                 <Card.Body className="centered">
-                    <Form>
+                    <Form onSubmit={submitHandler}>
                         <Form.Group>
                             <Form.Label className="label centered" id="label" htmlFor="input">
                                 <Button variant="primary" className="inner" id="inner" disabled>파일 업로드</Button>
@@ -38,18 +94,18 @@ function Create() {
                             <Form.Control id="input" className="input" accept="image/*" type="file" onChange={handleImageUpload} required={true} hidden={true} />
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId='formBasicText'>
+                        <Form.Group className="mb-3">
                             <Form.Label>
                                 제목
                             </Form.Label>
-                            <Form.Control type="text" placeholder="Title" />
+                            <Form.Control id="title" type="text" placeholder="Title" required={true}/>
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId='formBasicText'>
+                        <Form.Group className="mb-3">
                             <Form.Label>
                                 설명
                             </Form.Label>
-                            <Form.Control as="textarea" placeholder="Description" />
+                            <Form.Control id="description" as="textarea" placeholder="Description" required={true}/>
                         </Form.Group>
 
                         <Form.Group className="centered">
@@ -61,6 +117,5 @@ function Create() {
         </Container>
     )
 }
-
 
 export default Create;

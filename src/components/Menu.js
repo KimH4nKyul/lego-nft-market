@@ -7,7 +7,7 @@ function Menu() {
 
         <Navbar bg="light" expand="lg">
             <Container>
-                <Navbar.Brand><img alt="" src="images/lego_logo_small.png"></img></Navbar.Brand>
+                <Navbar.Brand><img alt="" src="images/lego_logo_small.png"/></Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
