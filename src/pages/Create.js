@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button } from 'react-bootstrap';
 import ipfs from "../ipfs";
-import {useMetaMask} from "metamask-react";
+import { useMetaMask } from "metamask-react";
 
 function Create() {
     const { account } = useMetaMask();
@@ -31,18 +31,19 @@ function Create() {
     };
 
     function handleImageUpload(event) {
+        console.log(window.ethereum);
         const fileBlob = event.target.files[0];
         // if(fileBlob.size > (100 * 1024 * 1024)) {alert("Don't do that!")}
         previewImage(fileBlob)
-            .then(()=> {
+            .then(() => {
                 bufferedImage(fileBlob)
-                    .catch((error)=>{
+                    .catch((error) => {
                         console.error("image to buffer: ", error);
                     });
             })
-            .catch((error)=>{
+            .catch((error) => {
                 console.error("preview image: ", error);
-        });
+            });
     }
 
     function submitHandler(event) {
@@ -50,9 +51,9 @@ function Create() {
         const title = document.getElementById('title').value;
         const desc = document.getElementById('description').value;
 
-        const minting = async() => {
+        const minting = async () => {
             const imageSrcToHash = await ipfs.add(uploadImageSrc)
-                .catch((error)=>{
+                .catch((error) => {
                     console.log("(IPFS) add image: ", error);
                 });
 
@@ -64,7 +65,7 @@ function Create() {
             }
 
             let metadataToHash = await ipfs.add(JSON.stringify(metadata))
-                .catch((error)=>{
+                .catch((error) => {
                     console.log("(IPFS) add metadata: ", error);
                 });
 
@@ -98,14 +99,14 @@ function Create() {
                             <Form.Label>
                                 제목
                             </Form.Label>
-                            <Form.Control id="title" type="text" placeholder="Title" required={true}/>
+                            <Form.Control id="title" type="text" placeholder="Title" required={true} />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
                             <Form.Label>
                                 설명
                             </Form.Label>
-                            <Form.Control id="description" as="textarea" placeholder="Description" required={true}/>
+                            <Form.Control id="description" as="textarea" placeholder="Description" required={true} />
                         </Form.Group>
 
                         <Form.Group className="centered">
