@@ -41,5 +41,15 @@ contract SaleLegoCadDeal {
 
         uint256 price = tokenPrice[_tokenId];
         require(msg.value == price, "8");
+
+        payable(legoCadDealOwner).transfer(msg.value);
+        legoCadDealAddress.safeTransferFrom(
+            legoCadDealOwner,
+            msg.sender,
+            _tokenId
+        );
+
+        onSaleToken[_tokenId] = false;
+        tokenPrice[_tokenId] = 0;
     }
 }
