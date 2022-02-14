@@ -8,9 +8,31 @@ contract SaleLegoCadDeal {
 
     mapping(uint256 => bool) onSaleToken;
     mapping(uint256 => uint256) public tokenPrice;
+    uint256[] onSaleTokenIdList;
 
     constructor(address _legoCadDealAddress) {
         legoCadDealAddress = LegoCadDeal(_legoCadDealAddress);
+    }
+
+    function add(uint256 _tokenId, bool _value) public {
+        onSaleToken[_tokenId] = _value;
+        onSaleTokenIdList.push(_tokenId);
+    }
+
+    function contains(uint256 _tokenId) public view returns (bool) {
+        return onSaleToken[_tokenId] != false;
+    }
+
+    function getByTokenId(uint256 _tokenId) public view returns (bool) {
+        return onSaleToken[_tokenId];
+    }
+
+    function size() public view returns (uint256) {
+        return uint256(onSaleTokenIdList.length);
+    }
+
+    function getTokenIds() public view returns (uint256[] memory) {
+        return onSaleTokenIdList;
     }
 
     function setTokenPrice(uint256 _tokenId, uint256 _price) public {
