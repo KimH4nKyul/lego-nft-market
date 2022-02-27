@@ -2,15 +2,21 @@ import React, { useState } from 'react';
 import { Container, Card, Form, Button } from 'react-bootstrap';
 import ipfs from "../ipfs";
 import { useMetaMask } from "metamask-react";
+import { ethers } from 'ethers';
+import { LEGOCADDEAL_ADDRESS } from '../contracts/address';
+
+const legoCadDealAbi = require('../contracts/LegoCadDeal.json');
 
 function Create() {
     const { account } = useMetaMask();
     const [previewImageSrc, setPreviewImageSrc] = useState('');
     const [uploadImageSrc, setUploadImageSrc] = useState('');
 
+
     const bufferedImage = (fileBlob) => {
         const reader = new FileReader();
         reader.readAsArrayBuffer(fileBlob);
+
         return new Promise((resolve) => {
             reader.onloadend = () => {
                 setUploadImageSrc(reader.result);
@@ -31,7 +37,6 @@ function Create() {
     };
 
     function handleImageUpload(event) {
-        console.log(window.ethereum);
         const fileBlob = event.target.files[0];
         // if(fileBlob.size > (100 * 1024 * 1024)) {alert("Don't do that!")}
         previewImage(fileBlob)
@@ -48,6 +53,13 @@ function Create() {
 
     function submitHandler(event) {
         event.preventDefault();
+        // ethers
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const legoCadDealContract = new ethers.Contract(LEGOCADDEAL_ADDRESS, legoCadDealAbi, provider);
+        const signer = provider.getSigner();
+        const contractWithSigner = legoCadDealContract.connect(signer);
+
+        // meta info
         const title = document.getElementById('title').value;
         const desc = document.getElementById('description').value;
 
@@ -71,7 +83,7 @@ function Create() {
 
             metadataToHash = "https://ipfs.io/ipfs/" + metadataToHash.path;
 
-            console.log(metadataToHash);
+            const currentTokenId = contractWithSigner.mint(account, metadataToHash);
         }
         minting();
         // document.location.replace('/world');
