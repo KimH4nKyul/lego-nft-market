@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Container, Card, Form, Button } from 'react-bootstrap';
 import ipfs from "../ipfs";
 import { useMetaMask } from "metamask-react";
-import { ethers } from 'ethers';
-import { LEGOCADDEAL_ADDRESS } from '../contracts/address';
+import { ethers, utils } from 'ethers';
+import { LEGOCADDEAL_ADDRESS, SALE_LEGOCADDEAL_ADDRESS } from '../contracts/address';
 
 const legoCadDealAbi = require('../contracts/LegoCadDeal.json');
+const saleLegoCadDealAbi = require('../contracts/SaleLegoCadDeal.json');
 
 function Create() {
     const { account } = useMetaMask();
@@ -56,12 +57,14 @@ function Create() {
         // ethers
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const legoCadDealContract = new ethers.Contract(LEGOCADDEAL_ADDRESS, legoCadDealAbi, provider);
+        const saleLegoCadDealContract = new ethers.Contract(SALE_LEGOCADDEAL_ADDRESS, saleLegoCadDealAbi, provider);
         const signer = provider.getSigner();
         const contractWithSigner = legoCadDealContract.connect(signer);
 
         // meta info
         const title = document.getElementById('title').value;
         const desc = document.getElementById('description').value;
+        const price = document.getElementById('price').value;
 
         const minting = async () => {
             const imageSrcToHash = await ipfs.add(uploadImageSrc)
@@ -72,6 +75,7 @@ function Create() {
             const metadata = {
                 title: title,
                 description: desc,
+                price: price,
                 creator: account,
                 image: "https://ipfs.io/ipfs/" + imageSrcToHash.path,
             }
@@ -83,11 +87,21 @@ function Create() {
 
             metadataToHash = "https://ipfs.io/ipfs/" + metadataToHash.path;
 
-            await contractWithSigner.mint(account, metadataToHash).then(
-                (result) => {
-                    console.log(result);
-                }
-            ).catch(error => console.error(error));
+            const tokenId = await contractWithSigner.mint(account, metadataToHash)
+                .then(async (response) => {
+                    const receipt = await response.wait();
+                    const event = await receipt.events.find(x => x.event === "Transfer");
+                    return parseInt(event.args.tokenId._hex, 16);
+                    // const events = receipt.events.find(x => x.args["tokenId"]._hex);
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+            await contractWithSigner.setApprovalForAll(SALE_LEGOCADDEAL_ADDRESS, true); // 판매 허가
+            console.log("tokenId", tokenId);
+
+            const saleContractWithSigner = saleLegoCadDealContract.connect(signer);
+            await saleContractWithSigner.setTokenPrice(tokenId, price);
         }
         minting();
         // document.location.replace('/world');
@@ -123,6 +137,13 @@ function Create() {
                                 설명
                             </Form.Label>
                             <Form.Control id="description" as="textarea" placeholder="Description" required={true} />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>
+                                가격
+                            </Form.Label>
+                            <Form.Control id="price" type="text" placeholider="Price" required={true} />
                         </Form.Group>
 
                         <Form.Group className="centered">
