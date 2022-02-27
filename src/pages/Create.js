@@ -83,7 +83,11 @@ function Create() {
 
             metadataToHash = "https://ipfs.io/ipfs/" + metadataToHash.path;
 
-            const currentTokenId = contractWithSigner.mint(account, metadataToHash);
+            await contractWithSigner.mint(account, metadataToHash).then(
+                (result) => {
+                    console.log(result);
+                }
+            ).catch(error => console.error(error));
         }
         minting();
         // document.location.replace('/world');

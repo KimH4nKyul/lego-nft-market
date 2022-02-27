@@ -14,11 +14,7 @@ contract LegoCadDeal is ERC721URIStorage, Ownable {
         _owner = msg.sender;
     }
 
-    function mint(address to, string memory tokenURI)
-        public
-        onlyOwner
-        returns (uint256)
-    {
+    function mint(address to, string memory tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(to, newItemId);

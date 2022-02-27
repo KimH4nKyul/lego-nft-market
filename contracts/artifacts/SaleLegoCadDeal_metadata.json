@@ -236,11 +236,11 @@
 			]
 		},
 		"Documents/lego-cad-project/lego-cad/contracts/LegoCadDeal.sol": {
-			"keccak256": "0x908238745021d3c8580df5eec2cb3932cdeff0d7c8e354ae03dc265add40c512",
+			"keccak256": "0x5de68f454ae8803b0621901207379a7b9fe075ef8370b2316e6dee089391f5f7",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://7be07298a8552e9648bfe7b4edfcb5f2a7151fbcc127c16f8a8f9ac7a4e0b08d",
-				"dweb:/ipfs/QmQwPMjF6wuHviFUwXfyXKfXsHsaCpK6sbVBn8SzhweqRZ"
+				"bzz-raw://645575faec79696ae5f6806e530019530fbfb5385efb34a9318a4c0cda7419c0",
+				"dweb:/ipfs/QmcoHwboPD6U77Ve7XZa93kdD71PyiXQFGeiWjEcqQRuzt"
 			]
 		},
 		"Documents/lego-cad-project/lego-cad/contracts/SaleLegoCadDeal.sol": {
