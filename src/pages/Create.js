@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Card, Form, Button } from 'react-bootstrap';
 import ipfs from "../ipfs";
 import { useMetaMask } from "metamask-react";
-import { ethers, utils } from 'ethers';
+import { ethers } from 'ethers';
 import { LEGOCADDEAL_ADDRESS, SALE_LEGOCADDEAL_ADDRESS } from '../contracts/address';
 
 const legoCadDealAbi = require('../contracts/LegoCadDeal.json');
